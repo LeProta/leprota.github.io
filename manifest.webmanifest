@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "Le Journal Financier",
+  "short_name": "Journal Financier",
+  "lang": "fr",
+  "start_url": "/notifications.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fbf8f1",
+  "theme_color": "#8d342e",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
