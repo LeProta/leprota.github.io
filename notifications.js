@@ -2,7 +2,7 @@
 const $ = id => document.getElementById(id);
 let registration, publicKey, subscription;
 const title = $('notification-title'), body = $('notification-body');
-function preferences() { return {title:title.value.trim() || 'Le Journal Financier', body:body.value.trim() || 'Votre édition du {date} est prête.'}; }
+function preferences() { return {title:title.value.trim() || 'Le Journal Financier', body:body.value.trim().replace(/\s+/g,' ') || 'Une nouvelle édition est disponible.'}; }
 function preview() {
   const p=preferences();
   $('preview-title').textContent=p.title;
@@ -21,6 +21,7 @@ function update() {
 (async () => {
   try {
     const saved=JSON.parse(localStorage.getItem('journal-notification-preferences') || 'null');
+    if(saved && saved.body === 'Votre édition du {date} est prête.') saved.body = 'Une nouvelle édition est disponible.';
     if(saved){title.value=String(saved.title || '').slice(0,80);body.value=String(saved.body || '').slice(0,240);}
   } catch { /* Pas de préférence enregistrée. */ }
   preview();
