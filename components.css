@@ -63,8 +63,8 @@ body.light {
 
 body.light .secondary,
 body.light .subtle-button {
-  background: var(--panel);
-  color: var(--text);
+  background: var(--panel, var(--jf-panel));
+  color: var(--text, var(--jf-text));
 }
 
 .white-button {
@@ -147,4 +147,9 @@ button:disabled {
     color: HighlightText;
     border: 2px solid HighlightText;
   }
+}
+
+/* Le survol ne doit pas éclaircir le fond d’une sélection et réduire son contraste. */
+.choices.settings-choices .choice:hover {
+  filter: none;
 }
