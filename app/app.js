@@ -21,7 +21,7 @@ function bookmark(i){const a=JOURNAL_DATA.articles[i];return `<button class="boo
 function articleMedia(a,css='story-thumb'){
  const media=a.media_key&&JOURNAL_DATA.media[a.media_key];
  const fallback=a.illustration==='regulation'?'document.svg':a.illustration==='bank'?'bank.svg':a.illustration==='markets'?'markets.svg':'economy.svg';
- return `<img class="${css}" src="${media?esc(media.url):'assets/'+fallback}" alt="${media?esc(media.caption):'Illustration de rubrique'}" loading="lazy">`;
+ return `<img class="${css}${media?'':' rubric-illustration'}" src="${media?esc(media.url):'assets/'+fallback}" alt="${media?esc(media.caption):'Illustration de rubrique'}" loading="lazy">`;
 }
 function mediaCaption(a){const m=a.media_key&&JOURNAL_DATA.media[a.media_key];return m?`<span>Illustration : ${esc(m.caption)} · ${esc(m.author)} / <a href="${esc(m.license_url)}" target="_blank" rel="noreferrer">${esc(m.license)}</a></span>`:'Illustration de rubrique · Le Journal Financier';}
 function articleRow(i){const a=JOURNAL_DATA.articles[i],thumb=!!a.media_key||i%2===0;
