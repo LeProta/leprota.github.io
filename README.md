@@ -35,3 +35,7 @@ Les changements d’interface doivent aussi être contrôlés dans un navigateur
 Ne jamais déposer ici les exports d’articles, un dossier de contrôle local, un PDF privé, un JSON Google d’authentification, un abonnement Web Push ou une clé VAPID privée. La clé publique VAPID et l’identifiant public OAuth peuvent être publiés. Les chemins de publication des contenus et leurs secrets restent dans le dépôt privé du journal.
 
 Les liens de présentation et de confidentialité utilisés par Google Auth Platform sont conservés. La génération quotidienne et les appels IA sont gérés séparément de cette interface.
+
+## Cahier des cours
+
+`app/learning.js` gère les séries de questions, les corrigés, leurs extraits de référence et les bilans. Les réponses ne sont conservées que dans la mémoire de la fenêtre et sont effacées à la déconnexion ou au changement d’édition. Le lecteur présente les extraits publiés ; il ne fournit pas d’accès direct aux documents de cours complets. `tests/learning.cjs` vérifie les QCM et vrai/faux, les doubles réponses, la reprise des erreurs et l’échappement des contenus.
