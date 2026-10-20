@@ -35,3 +35,12 @@ dialog{width:min(calc(100% - 28px),470px);max-width:470px;max-height:calc(100dvh
 @media(prefers-contrast:more){.ios-ui .nav-pill,.ios-ui .reading-pill,.ios-ui .group,.ios-ui .answer{border:2px solid var(--text)}.ios-ui .small-note,.ios-ui .caption{color:var(--text)}}
 
 html:has(dialog[open]){overflow:hidden}
+
+/* États explicites des réglages, indépendants des matériaux iOS. */
+.choices.settings-choices,.ios-ui .choices.settings-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,94px),1fr));gap:8px;padding:8px;margin-bottom:16px;background:var(--panel2)}
+.choices.settings-choices .choice,.ios-ui .choices.settings-choices .choice{position:relative;min-width:0;min-height:48px;width:100%;padding:10px 8px 14px;border:1px solid #7d8b9d;background:var(--panel);color:var(--text);font-size:12px;line-height:1.4;white-space:normal;overflow-wrap:anywhere;opacity:1;box-shadow:none}
+.choices.settings-choices .choice[aria-pressed=true],.ios-ui .choices.settings-choices .choice[aria-pressed=true]{background:#006ba1;border:2px solid #8bd9ff;color:#fff;font-weight:700;box-shadow:0 0 0 1px #006ba1}
+.choices.settings-choices .choice[aria-pressed=true]::after{content:'';position:absolute;bottom:5px;left:calc(50% - 7px);width:14px;height:3px;border-radius:2px;background:currentColor}
+.light .choices.settings-choices .choice{border-color:#68788a}.light .choices.settings-choices .choice[aria-pressed=true]{border-color:#003d60;background:#006ba1;color:#fff}
+.choices.settings-choices .choice:focus-visible{outline:3px solid var(--blue);outline-offset:3px}.choices.settings-choices .choice:active{filter:brightness(.92);opacity:1}
+@media(forced-colors:active){.choices.settings-choices .choice[aria-pressed=true]{background:Highlight;color:HighlightText;border-color:HighlightText}}
