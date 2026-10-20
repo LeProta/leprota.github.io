@@ -1528,8 +1528,6 @@ html {
 
 /* Géométrie mobile : dimensions intrinsèques, zones sûres et commandes non étirées. */
 
-
-
 html {
   scroll-padding-bottom: calc(var(--dock-height) + var(--dock-bottom) + 24px);
 }
@@ -2012,6 +2010,173 @@ dialog .quiz-top {
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Cahier des cours : lecture, entraînement et corrections dans la même charte. */
+.learning-step {
+  display: block;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.03em;
+  margin-bottom: 18px;
+}
+.learning-card.big {
+  padding-right: 20px;
+}
+.course-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block: 22px;
+}
+.course-resume,
+.course-practice {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  margin-block: 18px;
+}
+.course-resume {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.course-resume > div {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+.course-resume p,
+.course-practice p {
+  font-size: 15px;
+  line-height: 1.6;
+}
+.course-practice h3 {
+  margin-top: 0;
+}
+.course-explanation p,
+.course-reference blockquote {
+  white-space: pre-line;
+}
+.course-reference {
+  border-top: 1px solid var(--line);
+  padding-block: 10px;
+}
+.course-reference summary,
+.quiz-review summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding-block: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.reference-locator {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.course-reference blockquote {
+  font-size: 16px;
+  line-height: 1.7;
+  margin: 12px 0 8px;
+  padding: 0 0 0 14px;
+  border-left: 3px solid var(--blue);
+  overflow-wrap: anywhere;
+}
+#course-references {
+  scroll-margin-top: 18px;
+}
+.quiz-progress {
+  width: 100%;
+  height: 6px;
+  margin-top: 20px;
+  accent-color: var(--jf-action);
+}
+.quiz-progress::-webkit-progress-bar {
+  background: var(--line);
+  border-radius: 8px;
+}
+.quiz-progress::-webkit-progress-value {
+  background: var(--jf-action);
+  border-radius: 8px;
+}
+.quiz-progress::-moz-progress-bar {
+  background: var(--jf-action);
+  border-radius: 8px;
+}
+#quiz .answer {
+  min-height: 56px;
+  font-size: clamp(16px, var(--reading), 21px);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.answer-verdict {
+  display: block;
+  font-size: 13px;
+  font-weight: 750;
+  margin-top: 8px;
+}
+.quiz-score {
+  font-size: 52px;
+  font-weight: 800;
+  margin: 18px 0;
+}
+.quiz-score span {
+  font-size: 26px;
+  color: var(--muted);
+}
+#quiz .feedback {
+  font-size: 16px;
+  line-height: 1.65;
+  padding-bottom: 0;
+}
+.feedback h3 {
+  font-size: 20px;
+  margin-block: 16px 10px;
+}
+.answer-references h4 {
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+.quiz-next {
+  padding-block: 8px 14px;
+}
+.quiz-next .blue-button {
+  width: 100%;
+}
+.quiz-review {
+  margin-block: 24px;
+}
+.quiz-review > details {
+  border-top: 1px solid var(--line);
+  padding-block: 6px;
+}
+.quiz-review p {
+  font-size: 16px;
+  line-height: 1.65;
+}
+.review-verdict {
+  display: block;
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 750;
+}
+body.light #quiz .answer.correct {
+  border-color: #236643;
+  background: #e4f3e9;
+  color: #173a28;
+}
+body.light #quiz .answer.wrong {
+  border-color: #a23825;
+  background: #fff0eb;
+  color: #702616;
+}
+#quiz summary:focus-visible,
+#course-references summary:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
 }
 
 @media (prefers-reduced-motion: reduce) {

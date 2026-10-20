@@ -66,10 +66,7 @@ let theme = JournalAppearance.preference(),
   size = read("size", 18);
 if (!["dark", "light", "auto"].includes(theme)) theme = "auto";
 if (![16, 18, 21].includes(size)) size = 18;
-let quizQuestions = [],
-  quizIndex = 0,
-  quizCorrect = 0,
-  quizAnswered = false;
+let learningSession = null;
 let readingReturn = { route: "home", scroll: 0 },
   pendingReturnScroll = null;
 const main = document.getElementById("main"),
@@ -243,23 +240,17 @@ function reader() {
 function courses() {
   headings("Cours", "book");
   navigation("courses");
-  const c = JOURNAL_DATA.course;
-  if (!c) {
-    main.innerHTML =
-      '<h2 class="section-title">Votre espace de révision</h2><p class="empty">Cette édition ne contient pas de fiche de cours validée.</p>';
-    return;
-  }
-  const qcm = c.quiz.filter((q) => q.kind === "qcm").length,
-    vf = c.quiz.filter((q) => q.kind === "true_false").length;
-  main.innerHTML = `<div class="edition-line"><span>Le cahier des cours</span><span>${dateLabel()}</span></div><h2 class="section-title">Comprendre et s’entraîner</h2><div class="cards-grid"><button class="learning-card big" data-go="lesson"><h3>${esc(c.title)}</h3><p>La fiche issue de vos supports autorisés.</p><span class="white-button">Lire la fiche</span></button>${qcm ? `<button class="learning-card qcm" data-quiz="qcm">${icon("check")}<h3>QCM</h3><p>${qcm} question${qcm > 1 ? "s" : ""} corrigée${qcm > 1 ? "s" : ""}.</p><span class="white-button">Commencer</span></button>` : ""}${vf ? `<button class="learning-card vf" data-quiz="true_false">${icon("book")}<h3>Vrai ou faux</h3><p>${vf} affirmation${vf > 1 ? "s" : ""} expliquée${vf > 1 ? "s" : ""}.</p><span class="white-button">Commencer</span></button>` : ""}</div><p class="learning-source">Les références du support sont disponibles dans la fiche et les corrigés.</p>${credit()}`;
+  main.innerHTML =
+    JournalLearning.home(JOURNAL_DATA.course, dateLabel(), learningSession) +
+    credit();
 }
 function lesson() {
   if (!JOURNAL_DATA.course) return courses();
   headings("Fiche de cours", "book");
   navigation("courses");
-  const c = JOURNAL_DATA.course;
-  main.innerHTML = `<div class="article-toolbar"><button class="subtle-button" data-go="courses">← Mes cours</button><span class="eyebrow">Fiche de cours</span></div><h2 class="headline">${esc(c.title)}</h2><div class="article-body"><p>${esc(c.explanation)}</p></div><button class="blue-button" data-quiz="all">Vérifier mes acquis${icon("next")}</button><div class="source-box"><h2>Les passages du cours</h2>${c.references.map((r) => `<details><summary>${esc(r.document)} · ${esc(r.locator)}</summary><p>${esc(r.excerpt)}</p></details>`).join("")}</div>`;
+  main.innerHTML = JournalLearning.lesson(JOURNAL_DATA.course);
 }
+
 function archives(saved = false) {
   headings(saved ? "Mes favoris" : "Archives", saved ? "bookmark" : "archive");
   navigation(saved ? "menu" : "archives");
@@ -379,28 +370,50 @@ function render() {
       home(decoded);
   }
 }
-function startQuiz(kind) {
-  quizQuestions = JOURNAL_DATA.course.quiz.filter(
-    (q) => kind === "all" || q.kind === kind,
-  );
-  quizIndex = 0;
-  quizCorrect = 0;
-  quizAnswered = false;
-  renderQuiz();
+function clearLearning() {
+  learningSession = null;
   const dialog = document.getElementById("quiz");
-  dialog.showModal();
+  dialog.close();
+  document.getElementById("quiz-content").replaceChildren();
+}
+function startQuiz(kind) {
+  const course = JOURNAL_DATA?.course;
+  if (!course) return;
+  if (kind === "resume") {
+    if (!learningSession || learningSession.done) return;
+  } else if (kind === "mistakes") {
+    if (!learningSession?.done || !learningSession.mistakes.length) return;
+    learningSession = learningSession.retry();
+  } else {
+    if (!["all", "qcm", "true_false"].includes(kind)) return;
+    const questions = course.quiz.filter(
+      (q) => kind === "all" || q.kind === kind,
+    );
+    if (!questions.length) return;
+    learningSession = new JournalLearning.Session(course, questions);
+  }
+  const dialog = document.getElementById("quiz");
+  renderQuiz();
+  if (!dialog.open) dialog.showModal();
+  focusQuiz();
+}
+function focusQuiz(answer = false) {
+  const dialog = document.getElementById("quiz");
   dialog.scrollTop = 0;
+  document
+    .getElementById(answer ? "answer-result" : "quiz-heading")
+    ?.focus({ preventScroll: !answer });
 }
 function renderQuiz() {
-  const container = document.getElementById("quiz-content");
-  if (quizIndex >= quizQuestions.length) {
-    container.innerHTML = `<div class="quiz-top"><span>Votre fiche de cours</span><button class="round" data-close-quiz aria-label="Fermer l’exercice">${icon("close")}</button></div><h2 class="quiz-title">Session terminée.</h2><p>${quizCorrect} bonne${quizCorrect > 1 ? "s" : ""} réponse${quizCorrect > 1 ? "s" : ""} sur ${quizQuestions.length}.</p><p class="small-note">Ce résultat concerne cette session d’entraînement.</p><button class="blue-button" data-close-quiz>Revenir aux cours</button>`;
-    return;
-  }
-  const q = quizQuestions[quizIndex];
-  const options = q.kind === "qcm" ? q.options : ["Vrai", "Faux"];
-  container.innerHTML = `<div class="quiz-top"><span>${q.kind === "qcm" ? "QCM" : "Vrai ou faux"} · ${quizIndex + 1}/${quizQuestions.length}</span><button class="round" data-close-quiz aria-label="Fermer l’exercice">${icon("close")}</button></div><div class="progress"><span style="width:${(quizIndex / quizQuestions.length) * 100}%"></span></div><h2 class="quiz-title">${esc(q.prompt)}</h2><div>${options.map((o, i) => `<button class="answer" data-answer="${i}">${q.kind === "qcm" ? String.fromCharCode(65 + i) + ". " : ""}${esc(o)}</button>`).join("")}</div><div id="feedback" class="feedback" aria-live="polite"></div><div id="quiz-next" hidden><button class="blue-button" data-next-quiz>${quizIndex === quizQuestions.length - 1 ? "Voir mon résultat" : "Question suivante"}${icon("next")}</button></div>`;
+  document.getElementById("quiz-content").innerHTML =
+    JournalLearning.quiz(learningSession);
 }
+document.getElementById("quiz").addEventListener("close", () => {
+  if (JOURNAL_DATA && pageRoute() === "courses") {
+    courses();
+    main.focus({ preventScroll: true });
+  }
+});
 document.addEventListener("click", (event) => {
   const b = event.target.closest("button,[data-go]");
   if (!b) return;
@@ -513,33 +526,22 @@ document.addEventListener("click", (event) => {
     save("size", size);
     applyPreferences();
     toast("Taille du texte : " + size + " px");
+  } else if (b.hasAttribute("data-course-references")) {
+    const references = document.getElementById("course-references");
+    references?.focus();
+    references?.scrollIntoView({ block: "start" });
   } else if (b.hasAttribute("data-quiz")) {
     startQuiz(b.dataset.quiz);
   } else if (b.hasAttribute("data-close-quiz")) {
     document.getElementById("quiz").close();
-  } else if (b.hasAttribute("data-answer") && !quizAnswered) {
-    quizAnswered = true;
-    const q = quizQuestions[quizIndex],
-      selected = Number(b.dataset.answer),
-      correct = q.kind === "qcm" ? q.answer : q.answer ? 0 : 1;
-    if (selected === correct) quizCorrect++;
-    document.querySelectorAll("[data-answer]").forEach((button, i) => {
-      button.disabled = true;
-      if (i === correct) button.classList.add("correct");
-      else if (i === selected) button.classList.add("wrong");
-    });
-    const refs = (q.evidence || [])
-      .map((i) => JOURNAL_DATA.course.references[i]?.locator)
-      .filter(Boolean)
-      .join(", ");
-    document.getElementById("feedback").innerHTML =
-      `<strong>${selected === correct ? "Bonne réponse." : "À retenir."}</strong>${esc(q.explanation)}<p class="small-note">Support de cours · ${esc(refs)}</p>`;
-    document.getElementById("quiz-next").hidden = false;
-  } else if (b.hasAttribute("data-next-quiz")) {
-    quizIndex++;
-    quizAnswered = false;
+  } else if (b.hasAttribute("data-answer")) {
+    if (!learningSession?.answer(Number(b.dataset.answer))) return;
     renderQuiz();
-    document.getElementById("quiz").scrollTop = 0;
+    focusQuiz(true);
+  } else if (b.hasAttribute("data-next-quiz")) {
+    if (!learningSession?.next()) return;
+    renderQuiz();
+    focusQuiz();
   }
 });
 document.addEventListener("input", (event) => {
@@ -561,6 +563,7 @@ document.querySelector(".skip").addEventListener("click", (event) => {
   main.focus();
 });
 window.addEventListener("hashchange", () => {
+  document.getElementById("quiz").close();
   render();
   const targetScroll = pendingReturnScroll ?? 0;
   pendingReturnScroll = null;
@@ -575,6 +578,7 @@ window.addEventListener("reader:state", () => {
   const state = JournalReader.snapshot();
   if (state.status === "ready") {
     const changed = JOURNAL_DATA?.version !== state.data.version;
+    if (changed) clearLearning();
     JOURNAL_DATA = state.data;
     searchIndex = JOURNAL_DATA.articles.map((a) =>
       (a.title + " " + a.paragraphs.join(" ")).toLocaleLowerCase("fr"),
@@ -585,7 +589,10 @@ window.addEventListener("reader:state", () => {
       const requested = pageRoute();
       const destination =
         readerDestination ||
-        (requested.startsWith("article/") ? requested : "home");
+        (requested.startsWith("article/") ||
+        ["courses", "lesson"].includes(requested)
+          ? requested
+          : "home");
       readerDestination = null;
       const url = new URL(location.href);
       url.searchParams.set("edition", JOURNAL_DATA.version);
@@ -599,7 +606,7 @@ window.addEventListener("reader:state", () => {
     searchIndex = [];
     JOURNAL_DATA = null;
     favorites = new Set();
-    document.getElementById("quiz").close();
+    clearLearning();
   }
   render();
 });
