@@ -3,11 +3,11 @@
   "name": "Le Journal Financier",
   "short_name": "Journal Financier",
   "lang": "fr",
-  "start_url": "/notifications.html",
+  "start_url": "/app/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#fbf8f1",
-  "theme_color": "#8d342e",
+  "background_color": "#06080b",
+  "theme_color": "#119bd8",
   "icons": [
     {
       "src": "/icon-192.png",
