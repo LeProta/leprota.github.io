@@ -1,0 +1,150 @@
+/* Composants communs : mêmes formes et mêmes états sur toutes les pages. */
+
+:root {
+  --jf-action: #0078b0;
+  --jf-action-hover: #006b9d;
+  --jf-control-border: #617186;
+  --jf-control-radius: 999px;
+  --jf-control-height: 44px;
+}
+
+body.light {
+  --jf-control-border: #68788a;
+}
+
+.button,
+.blue-button,
+.secondary,
+.subtle-button,
+.white-button,
+.choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--jf-control-height);
+  max-width: 100%;
+  padding: 11px 20px;
+  border: 1px solid transparent;
+  border-radius: var(--jf-control-radius);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.button,
+.blue-button {
+  background: var(--jf-action);
+  border-color: var(--jf-action);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.button:hover,
+.blue-button:hover {
+  background: var(--jf-action-hover);
+  filter: none;
+}
+
+.secondary,
+.subtle-button {
+  background: var(--jf-panel);
+  color: var(--jf-text);
+  border-color: var(--jf-control-border);
+  font-size: 13px;
+}
+
+body.light .secondary,
+body.light .subtle-button {
+  background: var(--panel);
+  color: var(--text);
+}
+
+.white-button {
+  background: #fff;
+  color: #19343a;
+  font-size: 12px;
+  padding: 9px 20px;
+}
+
+.blue-button .icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.choices.settings-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 94px), 1fr));
+  gap: 8px;
+  padding: 4px 0 16px;
+  margin: 0;
+  background: transparent;
+}
+
+.choices.settings-choices .choice {
+  position: relative;
+  min-width: 0;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 8px;
+  border: 1px solid var(--jf-control-border);
+  background: transparent;
+  color: var(--text, var(--jf-text));
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 400;
+  opacity: 1;
+  box-shadow: none;
+}
+
+.choices.settings-choices .choice[aria-pressed="true"] {
+  background: var(--jf-action);
+  border-color: var(--jf-action);
+  color: #fff;
+  font-weight: 700;
+}
+
+.choices.settings-choices .choice[aria-pressed="true"]::after {
+  content: none;
+}
+
+.choice:focus-visible,
+.button:focus-visible,
+.blue-button:focus-visible,
+.secondary:focus-visible,
+.subtle-button:focus-visible {
+  outline: 3px solid var(--blue, var(--jf-blue));
+  outline-offset: 3px;
+}
+
+.choice:active,
+.button:active,
+.blue-button:active,
+.secondary:active,
+.subtle-button:active {
+  filter: brightness(0.92);
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+@media (forced-colors: active) {
+  .choices.settings-choices .choice {
+    border: 1px solid ButtonText;
+  }
+
+  .choices.settings-choices .choice[aria-pressed="true"] {
+    background: Highlight;
+    color: HighlightText;
+    border: 2px solid HighlightText;
+  }
+}
