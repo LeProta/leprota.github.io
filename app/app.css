@@ -603,8 +603,10 @@ main {
 }
 
 .group-row .icon {
-  width: 19px;
-  height: 19px;
+  width: 20px;
+  height: 20px;
+  color: var(--blue);
+  flex: none;
 }
 
 .settings-label {
@@ -2268,4 +2270,10 @@ html:has(dialog[open]) {
 }
 body.reading-mode .immersive-article {
   padding-top: 20px;
+}
+
+/* Les liens des réglages partagent le style des boutons voisins. */
+a.group-row {
+  color: var(--text);
+  text-decoration: none;
 }

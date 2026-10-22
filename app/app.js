@@ -15,6 +15,10 @@ const paths = {
   search: "M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14m5 12 6 6",
   settings:
     "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M10 2h4l1 4 4-1 2 3-3 4 3 4-2 3-4-1-1 4h-4l-1-4-4 1-2-3 3-4-3-4 2-3 4 1 1-4",
+  info: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18m0 8v6m0-10v.1",
+  lock: "M6 10h12v11H6zM8 10V7a4 4 0 0 1 8 0v3m-4 5v2",
+  login: "M14 3h6v18h-6M3 12h12m-4-4 4 4-4 4",
+  logout: "M10 3H4v18h6m1-9h10m-4-4 4 4-4 4",
   back: "m15 4-8 8 8 8",
   next: "m9 4 8 8-8 8",
   bookmark: "M6 3h12v19l-6-5-6 5z",
@@ -296,7 +300,7 @@ function menu() {
 function settings() {
   headings("Réglages", "settings");
   nav.innerHTML = "";
-  main.innerHTML = `<h2 class="settings-label">Lecture</h2><div class="group"><div class="group-row">Apparence</div><div class="choices settings-choices">${[
+  main.innerHTML = `<h2 class="settings-label">Lecture</h2><div class="group"><div class="group-row">Apparence ${icon("sun")}</div><div class="choices settings-choices">${[
     ["dark", "Sombre"],
     ["light", "Clair"],
     ["auto", "Automatique"],
@@ -307,7 +311,7 @@ function settings() {
     )
     .join(
       "",
-    )}</div><div class="group-row">Taille du texte</div><div class="choices settings-choices">${[
+    )}</div><div class="group-row">Taille du texte ${icon("type")}</div><div class="choices settings-choices">${[
     [16, "Petite"],
     [18, "Moyenne"],
     [21, "Grande"],
@@ -318,7 +322,7 @@ function settings() {
     )
     .join(
       "",
-    )}</div></div><h2 class="settings-label">Votre application</h2><div class="group"><a class="group-row" href="/index.html">Présentation ${icon("next")}</a><a class="group-row" href="/confidentialite.html">Confidentialité ${icon("shield")}</a><a class="group-row" href="/notifications.html">Gérer les notifications ${icon("next")}</a>${JOURNAL_DATA ? `<button class="group-row" data-go="saved">Mes articles enregistrés ${icon("bookmark")}</button><button class="group-row" data-disconnect>Se déconnecter de Google ${icon("shield")}</button>` : `<button class="group-row" data-connect>Se connecter avec Google ${icon("shield")}</button>`}</div><p class="small-note">${JournalReader.sessionMode?.() === "server" ? "Votre connexion est conservée sur cet appareil par le service de session. Les autorisations Google restent côté serveur. Utilisez Se déconnecter sur un appareil partagé." : "Sur cet hébergement, la connexion Google est temporaire. Une fermeture complète peut demander de rouvrir la connexion. Les autorisations Google restent uniquement en mémoire."} Les préférences d’apparence et les identifiants des favoris restent sur cet appareil.</p><a href="/confidentialite.html">Politique de confidentialité</a>`;
+    )}</div></div><h2 class="settings-label">Votre application</h2><div class="group"><a class="group-row" href="/index.html">Présentation ${icon("info")}</a><a class="group-row" href="/confidentialite.html">Confidentialité ${icon("lock")}</a><a class="group-row" href="/notifications.html">Gérer les notifications ${icon("bell")}</a>${JOURNAL_DATA ? `<button class="group-row" data-go="saved">Mes articles enregistrés ${icon("bookmark")}</button><button class="group-row" data-disconnect>Se déconnecter de Google ${icon("logout")}</button>` : `<button class="group-row" data-connect>Se connecter avec Google ${icon("login")}</button>`}</div><p class="small-note">${JournalReader.sessionMode?.() === "server" ? "Votre connexion est conservée sur cet appareil par le service de session. Les autorisations Google restent côté serveur. Utilisez Se déconnecter sur un appareil partagé." : "Sur cet hébergement, la connexion Google est temporaire. Une fermeture complète peut demander de rouvrir la connexion. Les autorisations Google restent uniquement en mémoire."} Les préférences d’apparence et les identifiants des favoris restent sur cet appareil.</p><a href="/confidentialite.html">Politique de confidentialité</a>`;
 }
 function lockedView() {
   const state = JournalReader.snapshot();
