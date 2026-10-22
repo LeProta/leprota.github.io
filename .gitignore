@@ -1,0 +1,8 @@
+session-server/node_modules/
+**/.env
+**/.env.*
+**/private/
+**/*.pem
+**/*credentials*.json
+**/*token*.json
+**/*secret*.json

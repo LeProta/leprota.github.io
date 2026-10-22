@@ -1,10 +1,10 @@
 {
   "name": "journal-financier-interface",
   "private": true,
-  "version": "0.13.2",
+  "version": "0.14.0",
   "description": "Contrôles locaux de l’interface statique, sans dépendance ni appel API",
   "scripts": {
-    "test": "node tests/reader-client.cjs && node tests/reader-races.cjs && node tests/appearance.cjs && node tests/learning.cjs"
+    "test": "node tests/reader-client.cjs && node tests/reader-races.cjs && node tests/appearance.cjs && node tests/learning.cjs && node tests/reader-session.cjs && node tests/shell.cjs && node tests/app-settings.cjs"
   },
   "engines": {
     "node": ">=22"

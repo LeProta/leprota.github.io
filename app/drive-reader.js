@@ -4,6 +4,9 @@
   const API = "https://www.googleapis.com/drive/v3/";
   const C = window.ReaderContract;
   let awaitingOAuth = false;
+  let serverActive = false;
+  const serverMode = () => config.authMode === "server";
+  const connected = () => serverActive || !!token;
   let token = "",
     expires = 0,
     expiryTimer,
@@ -27,6 +30,7 @@
   }
   function clear() {
     epoch++;
+    serverActive = false;
     token = "";
     expires = 0;
     clearTimeout(expiryTimer);
@@ -87,22 +91,27 @@
     return all;
   }
   async function api(path, params = {}, limit = 2000000) {
-    if (!token || Date.now() >= expires) {
+    if (!serverActive && (!token || Date.now() >= expires)) {
       expire();
       throw new Error("Reconnectez-vous à Google.");
     }
     const controller = new AbortController();
     active.add(controller);
     const timer = setTimeout(() => controller.abort(), 25000);
-    const url = new URL(API + path);
+    const url = new URL(
+      serverMode() ? "/api/drive/" + path : API + path,
+      location.href,
+    );
     for (const [k, v] of Object.entries(params))
       url.searchParams.set(k, String(v));
     try {
       return await bytes(
         await fetch(url.href, {
           method: "GET",
-          headers: { Authorization: "Bearer " + token },
-          credentials: "omit",
+          headers: serverMode()
+            ? { "X-Journal-Request": "1" }
+            : { Authorization: "Bearer " + token },
+          credentials: serverMode() ? "same-origin" : "omit",
           cache: "no-store",
           redirect: "error",
           referrerPolicy: "no-referrer",
@@ -253,7 +262,7 @@
     } catch (e) {
       if (current !== epoch) return;
       emit({
-        status: token ? "error" : "expired",
+        status: connected() ? "error" : "expired",
         message: e.message,
         data: null,
       });
@@ -292,6 +301,9 @@
       editions: [],
       userKey: "",
     });
+    await openLibrary(current);
+  }
+  async function openLibrary(current) {
     try {
       const about = parse(await api("about", { fields: "user(permissionId)" }));
       if (current !== epoch) return;
@@ -316,7 +328,7 @@
     } catch (e) {
       if (current === epoch)
         emit({
-          status: token ? "error" : "expired",
+          status: connected() ? "error" : "expired",
           message: e.message,
           data: null,
         });
@@ -353,6 +365,60 @@
       document.head.append(script);
     });
   }
+  async function serverCall(path, method = "GET") {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
+    try {
+      return await fetch(path, {
+        method,
+        credentials: "same-origin",
+        cache: "no-store",
+        redirect: "error",
+        headers: { "X-Journal-Request": "1" },
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  function pendingLogout(value) {
+    try {
+      if (value === undefined)
+        return localStorage.getItem("jf-reader-logout-pending") === "true";
+      if (value) localStorage.setItem("jf-reader-logout-pending", "true");
+      else localStorage.removeItem("jf-reader-logout-pending");
+    } catch {}
+    return false;
+  }
+  async function restoreServer() {
+    if (pendingLogout()) {
+      await disconnect();
+      return;
+    }
+    const generation = epoch;
+    const response = await serverCall("/api/session");
+    if (generation !== epoch || pendingLogout()) return;
+    if (!response.ok) throw new Error("Connexion temporairement indisponible");
+    const status = await response.json();
+    if (generation !== epoch || pendingLogout()) return;
+    if (status.connected !== true) {
+      emit({
+        status: "locked",
+        message:
+          "Connectez-vous une fois pour retrouver ensuite votre journal sur cet appareil.",
+        data: null,
+      });
+      return;
+    }
+    clear();
+    serverActive = true;
+    emit({
+      status: "loading",
+      message: "Ouverture de votre espace…",
+      data: null,
+    });
+    await openLibrary(epoch);
+  }
   async function init() {
     try {
       const response = await fetch("/app/reader-config.json", {
@@ -361,6 +427,10 @@
       });
       if (!response.ok) throw new Error();
       config = await response.json();
+      if (serverMode()) {
+        await restoreServer();
+        return;
+      }
       let local = "";
       try {
         local = localStorage.getItem("jf-reader-google-client") || "";
@@ -411,7 +481,27 @@
       data: null,
     });
   }
-  function connect() {
+  function connect({ switchAccount = false } = {}) {
+    if (serverMode()) {
+      if (pendingLogout()) {
+        disconnect();
+        return;
+      }
+      awaitingOAuth = false;
+      clear();
+      emit({
+        status: "connecting",
+        message: "Ouverture de votre connexion Google…",
+        data: null,
+      });
+      location.assign(
+        "/auth/google?return=" +
+          encodeURIComponent(
+            location.pathname + location.search + location.hash,
+          ),
+      );
+      return;
+    }
     if (!client) {
       emit({
         status: "setup",
@@ -429,11 +519,40 @@
       userKey: "",
       message: "Choisissez votre compte dans la fenêtre Google…",
     });
-    client.requestAccessToken({ prompt: "select_account" });
+    client.requestAccessToken({
+      prompt: switchAccount ? "select_account" : "",
+    });
   }
-  function disconnect() {
+  async function disconnect() {
     awaitingOAuth = false;
     clear();
+    if (serverMode()) {
+      pendingLogout(true);
+      emit({
+        status: "locked",
+        message: "Fermeture de votre connexion…",
+        data: null,
+        userKey: "",
+        editions: [],
+        logoutPending: true,
+      });
+      try {
+        const response = await serverCall("/auth/logout", "POST");
+        if (!response.ok) throw new Error();
+        pendingLogout(false);
+      } catch {
+        emit({
+          status: "locked",
+          message:
+            "La lecture est fermée. Réessayez la déconnexion lorsque le réseau est disponible pour la confirmer sur cet appareil.",
+          data: null,
+          userKey: "",
+          editions: [],
+          logoutPending: true,
+        });
+        return;
+      }
+    }
     emit({
       status: "locked",
       message:
@@ -441,6 +560,7 @@
       data: null,
       userKey: "",
       editions: [],
+      logoutPending: false,
     });
   }
   async function pdf() {
@@ -448,7 +568,7 @@
     const current = epoch,
       issue = issueData;
     const raw = await file(issue.pdf.file_id, issue.pdf.sha256, 25000000);
-    if (current !== epoch || !token)
+    if (current !== epoch || !connected())
       throw new Error("Votre session a changé pendant le téléchargement.");
     const url = URL.createObjectURL(
       new Blob([raw], { type: "application/pdf" }),
@@ -464,5 +584,6 @@
     loadIssue,
     pdf,
     snapshot: () => state,
+    sessionMode: () => (serverMode() ? "server" : "google"),
   });
 })();

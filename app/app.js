@@ -152,7 +152,7 @@ function sectionMatch(a, filter) {
   );
 }
 function headings(title, ico, home = false) {
-  header.innerHTML = `<div class="top ${home ? "home-top" : ""}">${home ? `<button class="wordmark" data-go="home" aria-label="Accueil du Journal Financier"><span class="monogram">JF</span><span>Le Journal<br><small>Financier</small></span></button>` : `<h1 class="page-heading">${icon(ico)}${esc(title)}</h1>`}<div class="header-actions"><button class="round" data-go="settings" aria-label="Ouvrir les réglages">${icon("settings")}</button>${home ? '<span class="private">Privé</span>' : ""}</div></div>`;
+  header.innerHTML = `<div class="top ${home ? "home-top" : ""}">${home ? `<button class="wordmark" data-go="home" aria-label="Accueil du Journal Financier"><span class="monogram">JF</span><span>Le Journal<br><small>Financier</small></span></button>` : `<h1 class="page-heading">${icon(ico)}${esc(title)}</h1>`}<div class="header-actions"><button class="round" data-go="settings" aria-label="Ouvrir les réglages">${icon("settings")}</button></div></div>`;
 }
 function navigation(active) {
   nav.innerHTML = `<nav class="floating" aria-label="Navigation principale"><div class="nav-pill">${[
@@ -279,7 +279,9 @@ function menu() {
       ([label, r]) =>
         `<button class="topic-row" data-go="${r}">${label}${icon("next")}</button>`,
     )
-    .join("")}</div>${credit()}`;
+    .join(
+      "",
+    )}</div><section class="application-links"><h2 class="settings-label">L’application</h2><a class="topic-row" href="/index.html">Présentation ${icon("next")}</a><a class="topic-row" href="/notifications.html">Notifications ${icon("bell")}</a><a class="topic-row" href="/confidentialite.html">Confidentialité ${icon("shield")}</a></section>${credit()}`;
 }
 function settings() {
   headings("Réglages", "settings");
@@ -306,7 +308,7 @@ function settings() {
     )
     .join(
       "",
-    )}</div></div><h2 class="settings-label">Votre application</h2><div class="group"><a class="group-row" href="/notifications.html">Gérer les notifications ${icon("next")}</a><button class="group-row" data-go="saved">Mes articles enregistrés ${icon("bookmark")}</button><button class="group-row" data-disconnect>Se déconnecter de Google ${icon("shield")}</button></div><p class="small-note">Le jeton de connexion et les articles chargés restent en mémoire pendant cette session. À la déconnexion ou à son expiration, ils sont effacés de l’application. Les préférences d’apparence et les identifiants des favoris restent sur cet appareil.</p><a href="/confidentialite.html">Politique de confidentialité</a>`;
+    )}</div></div><h2 class="settings-label">Votre application</h2><div class="group"><a class="group-row" href="/index.html">Présentation ${icon("next")}</a><a class="group-row" href="/confidentialite.html">Confidentialité ${icon("shield")}</a><a class="group-row" href="/notifications.html">Gérer les notifications ${icon("next")}</a>${JOURNAL_DATA ? `<button class="group-row" data-go="saved">Mes articles enregistrés ${icon("bookmark")}</button><button class="group-row" data-disconnect>Se déconnecter de Google ${icon("shield")}</button>` : `<button class="group-row" data-connect>Se connecter avec Google ${icon("shield")}</button>`}</div><p class="small-note">${JournalReader.sessionMode?.() === "server" ? "Votre connexion est conservée sur cet appareil par le service de session. Les autorisations Google restent côté serveur. Utilisez Se déconnecter sur un appareil partagé." : "Sur cet hébergement, la connexion Google est temporaire. Une fermeture complète peut demander de rouvrir la connexion. Les autorisations Google restent uniquement en mémoire."} Les préférences d’apparence et les identifiants des favoris restent sur cet appareil.</p><a href="/confidentialite.html">Politique de confidentialité</a>`;
 }
 function lockedView() {
   const state = JournalReader.snapshot();
@@ -314,14 +316,14 @@ function lockedView() {
   navigation("");
   document.body.classList.remove("reading-mode", "feed-mode");
   const loading = ["loading", "connecting"].includes(state.status);
-  main.innerHTML = `<section class="login-intro"><p class="eyebrow">Votre espace de lecture privé</p><h1>Le journal.<br>À votre rythme.</h1><p>L’actualité économique, vos éditions et vos révisions, réunies dans votre application.</p><div class="connection-card"><span class="connection-icon">${icon("shield")}</span><h2>${loading ? "Ouverture de votre espace…" : "Retrouvez vos journaux"}</h2><p role="status">${esc(state.message || "Connectez-vous à Google pour consulter votre bibliothèque privée.")}</p>${loading ? '<div class="loading-bar" aria-label="Chargement en cours"></div>' : state.status === "setup" ? "" : `<button class="blue-button" data-connect>Se connecter avec Google</button>`}</div><div class="login-features"><span>${icon("journal")}Articles et éditions</span><span>${icon("archive")}Archives conservées</span><span>${icon("book")}Cours et exercices</span></div>${state.status === "setup" ? `<details class="connection-setup" open><summary>Configurer la connexion Google</summary><p>Une configuration unique est nécessaire pour relier cette application à votre projet Google. Utilisez l’identifiant public du client Web, jamais une clé privée ni un fichier JSON.</p><label for="google-client">Identifiant public du client Web</label><input id="google-client" type="text" spellcheck="false" autocomplete="off" placeholder="…apps.googleusercontent.com"><button class="subtle-button" data-configure-google>Enregistrer la configuration</button><p id="setup-status" role="status"></p></details>` : ""}<p class="small-note">L’autorisation Google concerne les fichiers utilisés avec l’application. Elle inclut leur gestion ; ce lecteur s’en sert uniquement pour les consulter.</p><p class="small-note">Les journaux restent dans votre Drive. L’application n’envoie aucune requête de rédaction IA.</p><a class="small-note" href="/notifications.html">Configurer les notifications</a> · <a class="small-note" href="/confidentialite.html">Confidentialité</a></section>`;
+  main.innerHTML = `<section class="login-intro"><p class="eyebrow">Votre espace de lecture privé</p><h1>Le journal.<br>À votre rythme.</h1><p>L’actualité économique, vos éditions et vos révisions, réunies dans votre application.</p><div class="connection-card"><span class="connection-icon">${icon("shield")}</span><h2>${loading ? "Ouverture de votre espace…" : "Retrouvez vos journaux"}</h2><p role="status">${esc(state.message || "Connectez-vous à Google pour consulter votre bibliothèque privée.")}</p>${loading ? '<div class="loading-bar" aria-label="Chargement en cours"></div>' : state.status === "setup" ? "" : state.logoutPending ? `<button class="blue-button" data-disconnect>Confirmer la déconnexion</button>` : `<button class="blue-button" data-connect>Se connecter avec Google</button><button class="subtle-button" data-switch-account>Choisir un autre compte</button>`}</div><div class="login-features"><span>${icon("journal")}Articles et éditions</span><span>${icon("archive")}Archives conservées</span><span>${icon("book")}Cours et exercices</span></div>${state.status === "setup" ? `<details class="connection-setup" open><summary>Configurer la connexion Google</summary><p>Une configuration unique est nécessaire pour relier cette application à votre projet Google. Utilisez l’identifiant public du client Web, jamais une clé privée ni un fichier JSON.</p><label for="google-client">Identifiant public du client Web</label><input id="google-client" type="text" spellcheck="false" autocomplete="off" placeholder="…apps.googleusercontent.com"><button class="subtle-button" data-configure-google>Enregistrer la configuration</button><p id="setup-status" role="status"></p></details>` : ""}<p class="small-note">L’autorisation Google concerne les fichiers utilisés avec l’application. Elle inclut leur gestion ; ce lecteur s’en sert uniquement pour les consulter.</p><p class="small-note">Les journaux restent dans votre Drive. L’application n’envoie aucune requête de rédaction IA.</p><a class="small-note" href="/notifications.html">Configurer les notifications</a> · <a class="small-note" href="/confidentialite.html">Confidentialité</a></section>`;
 }
 function render() {
   JournalNativeUI.appearance(
     document.body.classList.contains("light"),
     pageRoute().startsWith("home") || !JOURNAL_DATA,
   );
-  if (!JOURNAL_DATA) return lockedView();
+  if (!JOURNAL_DATA && pageRoute() !== "settings") return lockedView();
   const [page, arg] = pageRoute().split("/");
   document.body.classList.toggle("feed-mode", page === "home");
   document.body.classList.toggle("reading-mode", page === "article");
@@ -417,6 +419,10 @@ document.getElementById("quiz").addEventListener("close", () => {
 document.addEventListener("click", (event) => {
   const b = event.target.closest("button,[data-go]");
   if (!b) return;
+  if (b.hasAttribute("data-switch-account")) {
+    JournalReader.connect({ switchAccount: true });
+    return;
+  }
   if (b.hasAttribute("data-connect")) {
     JournalReader.connect();
     return;
@@ -455,6 +461,22 @@ document.addEventListener("click", (event) => {
       })
       .catch((e) => toast(e.message))
       .finally(() => (readerPdfBusy = false));
+    return;
+  }
+  if (b.hasAttribute("data-theme")) {
+    theme = b.dataset.theme;
+    JournalAppearance.setPreference(theme);
+    return;
+  }
+  if (b.hasAttribute("data-size")) {
+    size = Number(b.dataset.size);
+    save("size", size);
+    applyPreferences();
+    toast("Taille du texte : " + size + " px");
+    return;
+  }
+  if (b.dataset.go === "settings") {
+    go("settings");
     return;
   }
   if (!JOURNAL_DATA) {
@@ -510,13 +532,6 @@ document.addEventListener("click", (event) => {
     toast(
       favorites.has(id) ? "Article enregistré" : "Article retiré des favoris",
     );
-  } else if (b.hasAttribute("data-theme")) {
-    theme = b.dataset.theme;
-    JournalAppearance.setPreference(theme);
-  } else if (b.hasAttribute("data-size")) {
-    size = Number(b.dataset.size);
-    save("size", size);
-    applyPreferences();
   } else if (b.hasAttribute("data-font")) {
     const sizes = [16, 18, 21];
     size =

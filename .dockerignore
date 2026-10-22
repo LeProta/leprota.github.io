@@ -1,0 +1,10 @@
+.git
+**/node_modules
+**/.env*
+**/private
+**/archive
+**/work
+**/outputs
+**/*.pem
+**/*credentials*.json
+**/*token*.json

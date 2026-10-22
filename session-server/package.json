@@ -1,0 +1,17 @@
+{
+  "name": "journal-financier-session-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node start.mjs",
+    "test": "node --test *.test.mjs"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "9.3.1",
+    "google-auth-library": "11.3.1"
+  }
+}
