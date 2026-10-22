@@ -19,13 +19,12 @@ for (const name of [
     !/<nav class="nav"/.test(html),
     "La navigation principale ne doit plus être dans l’en-tête",
   );
-  const dock = html.match(/<nav class="site-dock"[\s\S]*?<\/nav>/)?.[0];
-  assert(dock);
-  assert.deepEqual(
-    [...dock.matchAll(/href="([^"]+)"/g)].map((m) => m[1]),
-    links,
+  assert(
+    !html.includes('class="site-dock"'),
+    "Pas de dock dans les pages de réglage",
   );
-  assert.equal((dock.match(/aria-current="page"/g) || []).length, 1);
+  assert(html.includes('class="site-back"') && html.includes("data-page-back"));
+  assert(html.includes("/navigation.js?"));
   assert(html.includes("viewport-fit=cover"));
   assert(html.includes("/shell.css?"));
 }
@@ -42,7 +41,7 @@ for (const link of [
 ])
   assert(app.includes('href="' + link + '"'));
 console.log(
-  "Enveloppe : navigation basse identique, liens entre pages, réglages accessibles et badge retiré : OK.",
+  "Enveloppe : retour commun en haut à droite, liens entre pages, réglages accessibles et badge retiré : OK.",
 );
 
 for (const [name, markers] of Object.entries({

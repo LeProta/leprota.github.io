@@ -43,6 +43,10 @@ vm.runInNewContext(
       setPreference: (x) => (selected = x),
     },
     JournalNativeUI: { appearance() {} },
+    JournalNavigation: {
+      remember() {},
+      take: () => ({ url: "/app/#home", scroll: 0 }),
+    },
     JournalReader: {
       init() {},
       connect() {
@@ -79,6 +83,8 @@ assert.equal(saved.get("jf-reader-size"), "21");
 assert.equal(style["--reading"], "21px");
 click({ go: "settings" });
 assert.equal(location.hash, "#settings");
+click({ return: "" });
+assert.equal(location.hash, "#home", "Retour utilisable avant connexion");
 assert.equal(connects, 0);
 console.log(
   "Réglages sans connexion : thème, taille et navigation fonctionnels : OK.",

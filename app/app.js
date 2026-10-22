@@ -99,7 +99,15 @@ function toast(text) {
   clearTimeout(toast.timer);
   toast.timer = setTimeout(() => el.classList.remove("visible"), 2300);
 }
-function go(route) {
+function go(route, record = true) {
+  if (
+    record &&
+    pageRoute() !== route &&
+    (route === "settings" ||
+      (route.startsWith("article/") && !pageRoute().startsWith("article/")))
+  ) {
+    JournalNavigation.remember("#" + route);
+  }
   if (location.hash === "#" + route) {
     render();
     window.scrollTo(0, 0);
@@ -151,8 +159,11 @@ function sectionMatch(a, filter) {
     (filter === "Réglementation" && a.illustration === "regulation")
   );
 }
+function backButton() {
+  return `<button class="back-button" data-return aria-label="Retour à l’écran précédent">${icon("back")}<span>Retour</span></button>`;
+}
 function headings(title, ico, home = false) {
-  header.innerHTML = `<div class="top ${home ? "home-top" : ""}">${home ? `<button class="wordmark" data-go="home" aria-label="Accueil du Journal Financier"><span class="monogram">JF</span><span>Le Journal<br><small>Financier</small></span></button>` : `<h1 class="page-heading">${icon(ico)}${esc(title)}</h1>`}<div class="header-actions"><button class="round" data-go="settings" aria-label="Ouvrir les réglages">${icon("settings")}</button></div></div>`;
+  header.innerHTML = `<div class="top ${home ? "home-top" : ""}">${home ? `<button class="wordmark" data-go="home" aria-label="Accueil du Journal Financier"><span class="monogram">JF</span><span>Le Journal<br><small>Financier</small></span></button>` : `<h1 class="page-heading">${icon(ico)}${esc(title)}</h1>`}<div class="header-actions">${pageRoute() === "settings" ? backButton() : `<button class="round" data-go="settings" aria-label="Ouvrir les réglages">${icon("settings")}</button>`}</div></div>`;
 }
 function navigation(active) {
   nav.innerHTML = `<nav class="floating" aria-label="Navigation principale"><div class="nav-pill">${[
@@ -205,9 +216,8 @@ function journal() {
 function article(i) {
   if (!JOURNAL_DATA.articles[i]) return home();
   const a = JOURNAL_DATA.articles[i];
-  header.innerHTML =
-    '<div class="reading-progress" aria-hidden="true"><span id="reading-progress-bar"></span></div>';
-  nav.innerHTML = `<nav class="floating reading-controls" aria-label="Commandes de lecture"><button class="reading-close" data-return aria-label="Fermer l’article">${icon("close")}</button><div class="reading-pill">${bookmark(i)}<button data-font="-1" aria-label="Réduire le texte">A−</button><button data-font="1" aria-label="Agrandir le texte">A+</button><button data-share-source="${i}" aria-label="Partager la publication source">${icon("share")}</button></div><button class="reading-summary" data-go="journal" aria-label="Ouvrir le sommaire">${icon("journal")}</button></nav>`;
+  header.innerHTML = `<div class="top article-top"><span class="reading-label">Le Journal Financier</span>${backButton()}</div><div class="reading-progress" aria-hidden="true"><span id="reading-progress-bar"></span></div>`;
+  nav.innerHTML = `<nav class="floating reading-controls" aria-label="Commandes de lecture"><div class="reading-pill">${bookmark(i)}<button data-font="-1" aria-label="Réduire le texte">A−</button><button data-font="1" aria-label="Agrandir le texte">A+</button><button data-share-source="${i}" aria-label="Partager la publication source">${icon("share")}</button></div><button class="reading-summary" data-go="journal" aria-label="Ouvrir le sommaire">${icon("journal")}</button></nav>`;
   main.innerHTML = `<article class="immersive-article"><p class="eyebrow">${esc(a.section)}</p><h1 class="headline">${esc(a.title)}</h1><p class="standfirst">${esc(a.deck)}</p><div class="reading-byline"><strong>Le Journal Financier</strong><span>Édition du ${dateLabel()} · ${a.minutes} min de lecture</span><span>Source : ${esc(a.source)}</span></div><figure class="reading-figure">${articleMedia(a, "hero-photo")}<figcaption>${mediaCaption(a)}</figcaption></figure><div class="article-body">${a.paragraphs.map((t) => `<p>${esc(t)}</p>`).join("")}</div><div id="article-end" class="source-box"><strong>La publication d’origine</strong><p>${esc(a.source)} · Source conservée dans cette édition.</p><a href="${esc(a.url)}" target="_blank" rel="noreferrer">Consulter la source ↗</a></div></article><section class="reading-next"><h2 class="section-title">À lire aussi</h2>${articleRow((i + 1) % JOURNAL_DATA.articles.length)}</section>`;
   updateReadingProgress();
 }
@@ -285,7 +295,7 @@ function menu() {
 }
 function settings() {
   headings("Réglages", "settings");
-  navigation("menu");
+  nav.innerHTML = "";
   main.innerHTML = `<h2 class="settings-label">Lecture</h2><div class="group"><div class="group-row">Apparence</div><div class="choices settings-choices">${[
     ["dark", "Sombre"],
     ["light", "Clair"],
@@ -479,14 +489,20 @@ document.addEventListener("click", (event) => {
     go("settings");
     return;
   }
+  if (b.hasAttribute("data-return")) {
+    const target = JournalNavigation.take(
+      pageRoute() === "settings" ? "/app/#home" : "#" + readingReturn.route,
+    );
+    const url = new URL(target.url, location.href);
+    if (url.pathname === location.pathname && url.search === location.search) {
+      pendingReturnScroll = target.scroll;
+      go(url.hash.slice(1) || "home", false);
+    } else JournalNavigation.leave(target);
+    return;
+  }
   if (!JOURNAL_DATA) {
     if (b.hasAttribute("data-go"))
       toast("Connectez-vous pour accéder à votre bibliothèque.");
-    return;
-  }
-  if (b.hasAttribute("data-return")) {
-    pendingReturnScroll = readingReturn.scroll;
-    go(readingReturn.route);
     return;
   }
   if (b.hasAttribute("data-share-source")) {
@@ -605,7 +621,7 @@ window.addEventListener("reader:state", () => {
       const destination =
         readerDestination ||
         (requested.startsWith("article/") ||
-        ["courses", "lesson"].includes(requested)
+        ["courses", "lesson", "settings"].includes(requested)
           ? requested
           : "home");
       readerDestination = null;

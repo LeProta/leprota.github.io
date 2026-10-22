@@ -1151,8 +1151,8 @@ html {
 }
 
 .reading-mode header {
-  border: 0;
-  height: 0;
+  border-bottom: 1px solid var(--line);
+  height: auto;
   top: 0;
 }
 
@@ -2234,4 +2234,38 @@ html:has(dialog[open]) {
 }
 .application-links .topic-row {
   text-decoration: none;
+}
+
+/* Le même retour en haut à droite pour les réglages et la lecture. */
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+}
+.back-button .icon {
+  width: 20px;
+  height: 20px;
+}
+.reading-label {
+  font-size: 14px;
+  font-weight: 700;
+  min-width: 0;
+}
+.article-top {
+  height: auto;
+  min-height: 64px;
+}
+body.reading-mode .immersive-article {
+  padding-top: 20px;
 }
